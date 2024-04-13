@@ -2,7 +2,7 @@
 'use client'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './clients.css';
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import axios from 'axios';
 
 
@@ -10,6 +10,7 @@ export default function Clients() {
 
 
   const [dataApi, setDataApi] = useState<any>([]);
+  const [dataApiBackup, setDataApiBackup] = useState<any>([]);
   useEffect(() => {
     getData();
   }, []);
@@ -20,6 +21,7 @@ export default function Clients() {
     try {
       axios.get('http://localhost:5199/api/clients').then((response: any) => {
         setDataApi(response.data);
+        setDataApiBackup(response.data);
         console.log(dataApi);
         console.log(response);
       }).catch((error: any) => {
@@ -32,6 +34,20 @@ export default function Clients() {
 
   }
 
+  const filter = (event:any)=>{
+    const searchText = event.target.value.toLowerCase();
+    let result = dataApiBackup.filter((x:any)=>
+    x.firstName.toLowerCase().includes(searchText.toLowerCase()) || x.lastName.toLowerCase().includes(searchText.toLowerCase()) ||
+    x.email.toLowerCase().includes(searchText.toLowerCase()) || x.companyName.toLowerCase().includes(searchText.toLowerCase())||x.cellPhone.includes(searchText));
+    setDataApi((prevData:any) => {
+      if (event.target.value === '') {
+        return dataApiBackup;
+      } else {
+        return result;
+      }
+    });
+  }
+
 
 
 
@@ -39,10 +55,12 @@ export default function Clients() {
 
     
       <div className="container justify-content-center">
+        <input type="text" placeholder='Buscar' onChange={filter}/>
         {
           dataApi && dataApi.length > 0 ? (
-
-              <table className="table">
+              
+              <div className='table-responsive'>
+                <table className="table align-middle">
               <thead>
                 <tr>
                   <th scope="col" className='hidden-sm'>#</th>
@@ -70,6 +88,8 @@ export default function Clients() {
                 }
               </tbody>
             </table>
+              </div>
+              
               
             
           ) : (
